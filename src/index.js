@@ -54,17 +54,18 @@ async function run() {
   let base = null;
   let head = null;
   if (validSortedTags.length > 1) {
-    base = validSortedTags[1].commit.sha;
-    head = validSortedTags[0].commit.sha;
-  } else if (validSortedTags.length === 1) {
-    const { data: commits } = await octokit.rest.repos.listCommits({
-      owner,
-      repo,
-      per_page: 1,
-    });
-    const firstCommit = commits[0];
-    base = firstCommit.sha;
-    head = validSortedTags[0].commit.sha;
+    //! for Gitea
+    base = validSortedTags[1].name;
+    head = validSortedTags[0].name;
+    // } else if (validSortedTags.length === 1) {
+    //   const { data: commits } = await octokit.rest.repos.listCommits({
+    //     owner,
+    //     repo,
+    //     per_page: 1,
+    //   });
+    //   const firstCommit = commits[0];
+    //   base = firstCommit.sha;
+    //   head = validSortedTags[0].commit.sha;
   } else {
     setFailed("Couldn't find previous tag");
     return;
