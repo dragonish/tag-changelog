@@ -10774,13 +10774,40 @@ module.exports = generateChangelog;
 /***/ }),
 
 /***/ 2243:
-/***/ ((module) => {
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+const parseRevertBody = __nccwpck_require__(9173);
 
 function groupByType(commits, typeConfig) {
+  const revertDict = {};
+  commits.forEach(commit => {
+    if (commit.type === "revert") {
+      const hash = parseRevertBody(commit.body);
+      if (hash) {
+        revertDict[hash] = commit.sha;
+      }
+    }
+  });
+
+  const ignoreHashes = new Set();
+  const revertHashes = Object.keys(revertDict);
+  if (revertHashes.length > 0) {
+    commits.forEach(commit => {
+      if (revertHashes.includes(commit.sha)) {
+        ignoreHashes.add(commit.sha);
+        ignoreHashes.add(revertDict[commit.sha]);
+      }
+    });
+  }
+
   // First, group all the commits by their types.
   // We end up with a dictionary where the key is the type, and the values is an array of commits.
   const byType = {};
   commits.forEach(commit => {
+    if (ignoreHashes.has(commit.sha)) {
+      return;
+    }
+
     if (!byType[commit.type]) {
       byType[commit.type] = [];
     }
@@ -10851,6 +10878,22 @@ async function parseCommitMessage(message, repoUrl, fetchUserFunc) {
 }
 
 module.exports = parseCommitMessage;
+
+
+/***/ }),
+
+/***/ 9173:
+/***/ ((module) => {
+
+function parseRevertBody(body) {
+  const match = body.match(/[a-f0-9]{40}/i);
+  if (match) {
+    return match[0];
+  }
+  return null;
+}
+
+module.exports = parseRevertBody;
 
 
 /***/ }),
