@@ -1,8 +1,35 @@
+const parseRevertBody = require("./parseRevertBody");
+
 function groupByType(commits, typeConfig) {
+  const revertDict = {};
+  commits.forEach(commit => {
+    if (commit.type === "revert") {
+      const hash = parseRevertBody(commit.body);
+      if (hash) {
+        revertDict[hash] = commit.sha;
+      }
+    }
+  });
+
+  const ignoreHashes = new Set();
+  const revertHashes = Object.keys(revertDict);
+  if (revertHashes.length > 0) {
+    commits.forEach(commit => {
+      if (revertHashes.includes(commit.sha)) {
+        ignoreHashes.add(commit.sha);
+        ignoreHashes.add(revertDict[commit.sha]);
+      }
+    });
+  }
+
   // First, group all the commits by their types.
   // We end up with a dictionary where the key is the type, and the values is an array of commits.
   const byType = {};
   commits.forEach(commit => {
+    if (ignoreHashes.has(commit.sha)) {
+      return;
+    }
+
     if (!byType[commit.type]) {
       byType[commit.type] = [];
     }

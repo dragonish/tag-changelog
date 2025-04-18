@@ -90,4 +90,14 @@ describe("parseCommitMessage", () => {
     assert.strictEqual(result.scope, undefined);
     assert.strictEqual(result.type, "other");
   });
+
+  it("should parse a basic revert", async () => {
+    const result = await parseCommitMessage(
+      'revert: "fix(scope): This is a fix"\n\nThis reverts commit 7ec9e81e765a457f012bf0747f7a5a60831899e2.'
+    );
+
+    assert.strictEqual(result.subject, '"fix(scope): This is a fix"');
+    assert.strictEqual(result.body, "This reverts commit 7ec9e81e765a457f012bf0747f7a5a60831899e2.");
+    assert.strictEqual(result.type, "revert");
+  });
 });

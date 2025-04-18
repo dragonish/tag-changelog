@@ -76,4 +76,35 @@ describe("groupByType", () => {
     assert.notDeepStrictEqual(result, notExpected);
     assert.deepStrictEqual(result, expected);
   });
+
+  it("should test with reverts", () => {
+    const commits = [
+      {
+        subject: "Fix",
+        type: "fix",
+        sha: "7ec9e81e765a457f012bf0747f7a5a60831899e2",
+      },
+      {
+        subject: "Feature",
+        type: "feat",
+        sha: "bcb8767bc22bc7d4ab47a4fffd4ef435de581054",
+      },
+      {
+        subject: 'revert: "fix: Fix"',
+        type: "revert",
+        body: "This reverts commit 7ec9e81e765a457f012bf0747f7a5a60831899e2.",
+        sha: "f5ee7f1bc36e2b0688c83918e9821de10a97aa04",
+      },
+    ];
+
+    const expected = [
+      {
+        type: "feat",
+        commits: [{ subject: "Feature", type: "feat", sha: "bcb8767bc22bc7d4ab47a4fffd4ef435de581054" }],
+      },
+    ];
+
+    const result = groupByType(commits, DEFAULT_CONFIG.types);
+    assert.deepStrictEqual(result, expected);
+  });
 });
